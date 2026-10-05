@@ -254,9 +254,10 @@
     <div class="modal-content">
       <h3>图片转拼豆 - 参数设置</h3>
 
-      <div class="upload-area">
+      <div class="upload-area" id="upload-drop-zone">
         <input type="file" id="image-upload-input" accept="image/*" style="display:none;">
         <button class="btn" onclick="document.getElementById('image-upload-input').click()">选择图片</button>
+        <div class="hint-text">📱 手机：点击上方按钮从相册选图<br>💻 电脑：也可将图片直接拖到此区域</div>
         <div id="image-preview" style="margin-top: 15px; max-width: 400px;"></div>
       </div>
 

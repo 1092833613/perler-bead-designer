@@ -2062,6 +2062,50 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
   
+  // 上传区域拖拽支持（电脑端可直接拖图片到此区域）
+  const uploadDropZone = document.getElementById('upload-drop-zone');
+  if (uploadDropZone) {
+    uploadDropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      uploadDropZone.style.borderColor = '#5C6BC0';
+      uploadDropZone.style.background = '#E8EAF6';
+    });
+    uploadDropZone.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      uploadDropZone.style.borderColor = '';
+      uploadDropZone.style.background = '';
+    });
+    uploadDropZone.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      uploadDropZone.style.borderColor = '';
+      uploadDropZone.style.background = '';
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) {
+        // 复用 input 的 change 处理逻辑：手动赋值 FileList 不可行，直接处理
+        try {
+          currentUploadImage = await ImageProcessor.loadImage(file);
+          const previewImg = document.createElement('img');
+          previewImg.src = URL.createObjectURL(file);
+          previewImg.style.maxWidth = '100%';
+          previewImg.style.maxHeight = '200px';
+          previewImg.style.border = '1px solid #ddd';
+          previewImg.style.borderRadius = '4px';
+          if (imagePreview) {
+            imagePreview.innerHTML = '';
+            imagePreview.appendChild(previewImg);
+          }
+        } catch (err) {
+          alert('图片加载失败: ' + err.message);
+        }
+      } else {
+        alert('请拖入图片文件（JPG/PNG等）');
+      }
+    });
+  }
+  
   // 滑块值实时显示
   const sliders = [
     { id: 'brightness-slider', valueId: 'brightness-value' },
