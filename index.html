@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>拼豆设计工具 - Perler Bead Designer</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- ===== 顶部工具栏 ===== -->
+    <div class="toolbar">
+      <h1 class="toolbar-title">🧵 拼豆设计工具</h1>
+      
+      <!-- 桌面端可见的工具栏分组 -->
+      <div class="toolbar-section toolbar-desktop">
+        <button id="btn-undo" class="btn" title="撤销 (Ctrl+Z)">↩️ 撤销</button>
+        <button id="btn-redo" class="btn" title="重做 (Ctrl+Y)">↪️ 重做</button>
+      </div>
+      
+      <!-- 工具按钮（移动端也显示） -->
+      <div class="toolbar-section toolbar-tools">
+        <button id="tool-brush" class="tool-btn active" title="画笔 (B)">🖊️</button>
+        <button id="tool-eraser" class="tool-btn" title="橡皮擦 (E)">🧹</button>
+        <button id="tool-fill" class="tool-btn" title="填充 (G)">🪣</button>
+        <button id="tool-eyedropper" class="tool-btn" title="取色器 (I)">💉</button>
+        <button id="tool-line" class="tool-btn" title="直线 (L)">📏</button>
+      </div>
+
+      <!-- 编辑器增强工具（选区/缩放/平移） -->
+      <div class="toolbar-section toolbar-desktop">
+        <button id="tool-select" class="tool-btn" title="选区 (S)">⬚</button>
+        <button id="tool-zoom" class="tool-btn" title="缩放 (Z)">🔍</button>
+        <button id="tool-pan" class="tool-btn" title="平移 (P)">✋</button>
+      </div>
+
+      <!-- 桌面端工具栏其余部分 -->
+      <div class="toolbar-section toolbar-desktop">
+        <label style="font-size: 13px; color: #666;">网格尺寸:</label>
+        <select id="grid-size-select">
+          <option value="29x29" selected>标准板 29×29</option>
+          <option value="50x50">大板 50×50</option>
+          <option value="14x14">小板 14×14</option>
+          <option value="custom">自定义...</option>
+        </select>
+      </div>
+
+      <!-- 品牌色板切换 -->
+      <div class="toolbar-section toolbar-desktop">
+        <label style="font-size: 13px; color: #666;">品牌色板:</label>
+        <select id="palette-brand-select">
+          <option value="perler" selected>Perler</option>
+          <option value="hama">Hama</option>
+          <option value="artkal">Artkal</option>
+        </select>
+      </div>
+
+      <div class="toolbar-section toolbar-desktop">
+        <button id="btn-toggle-grid" class="btn active">网格线</button>
+        <button id="btn-clear" class="btn">清空</button>
+      </div>
+
+      <!-- 镜像 / 视图 -->
+      <div class="toolbar-section toolbar-desktop">
+        <button id="btn-mirror-h" class="btn" title="水平镜像">⇋ H</button>
+        <button id="btn-mirror-v" class="btn" title="垂直镜像">⇅ V</button>
+        <button id="btn-reset-view" class="btn" title="重置视图">⟲</button>
+      </div>
+
+      <!-- 图案库 -->
+      <div class="toolbar-section toolbar-desktop">
+        <button id="btn-patterns" class="btn" title="图案库">🎨 图案</button>
+      </div>
+
+      <div class="toolbar-section toolbar-desktop">
+        <!-- 保留隐藏的旧上传输入，兼容 app.js 现有绑定 -->
+        <input type="file" id="image-upload" accept="image/*" style="display: none;">
+        <button id="btn-open-upload-dialog" class="btn">📷 上传图片</button>
+      </div>
+
+      <div class="toolbar-section toolbar-desktop">
+        <button id="btn-export-png" class="btn">📥 导出PNG</button>
+        <button id="btn-print-sheet" class="btn">🖨️ 打印图纸</button>
+        <button id="btn-export-materials" class="btn">📋 材料清单</button>
+        <button id="btn-export-text" class="btn">📝 导出文本</button>
+      </div>
+
+      <div class="toolbar-section toolbar-desktop">
+        <button id="btn-save-gallery" class="btn">💾 存到作品库</button>
+        <button id="btn-open-gallery" class="btn">🖼️ 打开作品库</button>
+        <button id="btn-save-project" class="btn">💾 保存</button>
+        <button id="btn-load-project" class="btn">📂 加载</button>
+        <button id="btn-export-json" class="btn">⬇️ 导出JSON</button>
+        <button id="btn-import-json" class="btn">⬆️ 导入JSON</button>
+      </div>
+
+      <!-- 移动端"更多"菜单按钮 -->
+      <button id="btn-more-menu" class="btn btn-more-menu mobile-only" title="更多">☰</button>
+    </div>
+
+    <!-- 移动端"更多"下拉菜单 -->
+    <div id="more-menu-dropdown" class="more-menu-dropdown">
+      <div class="more-menu-section">
+        <button id="btn-undo-m" class="btn btn-more-item">↩️ 撤销</button>
+        <button id="btn-redo-m" class="btn btn-more-item">↪️ 重做</button>
+      </div>
+      <div class="more-menu-section">
+        <label class="more-menu-label">网格尺寸:</label>
+        <select id="grid-size-select-m">
+          <option value="29x29" selected>标准板 29×29</option>
+          <option value="50x50">大板 50×50</option>
+          <option value="14x14">小板 14×14</option>
+          <option value="custom">自定义...</option>
+        </select>
+      </div>
+      <div class="more-menu-section">
+        <button id="btn-toggle-grid-m" class="btn btn-more-item active">网格线</button>
+        <button id="btn-clear-m" class="btn btn-more-item">清空</button>
+      </div>
+      <div class="more-menu-section">
+        <button id="btn-open-upload-dialog-m" class="btn btn-more-item">📷 上传图片</button>
+      </div>
+      <div class="more-menu-section">
+        <button id="btn-mirror-h-m" class="btn btn-more-item">⇋ 水平镜像</button>
+        <button id="btn-mirror-v-m" class="btn btn-more-item">⇅ 垂直镜像</button>
+        <button id="btn-reset-view-m" class="btn btn-more-item">⟲ 重置视图</button>
+      </div>
+      <div class="more-menu-section">
+        <button id="btn-patterns-m" class="btn btn-more-item">🎨 图案库</button>
+      </div>
+      <div class="more-menu-section">
+        <button id="btn-export-png-m" class="btn btn-more-item">📥 导出PNG</button>
+        <button id="btn-print-sheet-m" class="btn btn-more-item">🖨️ 打印图纸</button>
+        <button id="btn-export-materials-m" class="btn btn-more-item">📋 材料清单</button>
+        <button id="btn-export-text-m" class="btn btn-more-item">📝 导出文本</button>
+      </div>
+      <div class="more-menu-section">
+        <button id="btn-save-gallery-m" class="btn btn-more-item">💾 存到作品库</button>
+        <button id="btn-open-gallery-m" class="btn btn-more-item">🖼️ 打开作品库</button>
+      </div>
+      <div class="more-menu-section">
+        <button id="btn-save-project-m" class="btn btn-more-item">💾 保存</button>
+        <button id="btn-load-project-m" class="btn btn-more-item">📂 加载</button>
+        <button id="btn-export-json-m" class="btn btn-more-item">⬇️ 导出JSON</button>
+        <button id="btn-import-json-m" class="btn btn-more-item">⬆️ 导入JSON</button>
+      </div>
+    </div>
+    
+    <!-- ===== 主内容区域 ===== -->
+    <div class="main-content">
+      <!-- 左侧色板面板 -->
+      <div class="sidebar-left" id="sidebar-palette">
+        <div class="current-color-section">
+          <h3>当前颜色</h3>
+          <div id="current-color-preview"></div>
+          <div id="current-color-info">点击色板选择颜色</div>
+        </div>
+        
+        <div class="recent-colors-section">
+          <h3>最近使用</h3>
+          <div id="recent-colors"></div>
+        </div>
+        
+        <div class="divider"></div>
+        
+        <h3>拼豆色板</h3>
+        <div id="color-palette"></div>
+      </div>
+      
+      <!-- 中央画布区域 -->
+      <div class="canvas-area">
+        <!-- 移动端颜色预览条 -->
+        <div id="mobile-color-bar" class="mobile-color-bar mobile-only">
+          <div id="mobile-color-swatch"></div>
+          <span id="mobile-color-text">白色 #FFFFFF</span>
+        </div>
+        <div id="canvas-container">
+          <canvas id="editor-canvas"></canvas>
+        </div>
+      </div>
+      
+      <!-- 右侧信息面板 -->
+      <div class="sidebar-right" id="sidebar-info">
+        <h3>画布信息</h3>
+        <div class="info-item">
+          <span class="label">尺寸</span>
+          <span class="value" id="grid-size-display">29 × 29</span>
+        </div>
+        <div class="info-item">
+          <span class="label">坐标</span>
+          <span class="value" id="coord-display">-</span>
+        </div>
+        <div class="info-item">
+          <span class="label">当前工具</span>
+          <span class="value" id="current-tool-display">画笔</span>
+        </div>
+        
+        <div class="divider"></div>
+        
+        <h3>颜色统计</h3>
+        <div class="info-item">
+          <span class="label" id="color-count">已用颜色: 0</span>
+        </div>
+        <div class="info-item">
+          <span class="label" id="bead-count">总拼豆数: 0</span>
+        </div>
+        
+        <div id="color-statistics"></div>
+        
+        <div class="divider"></div>
+        
+        <h3>已保存项目</h3>
+        <ul id="project-list"></ul>
+      </div>
+
+      <!-- 项目面板（移动端合并到第三个 tab） -->
+      <div class="sidebar-right" id="sidebar-projects" style="display:none;">
+        <h3>已保存项目</h3>
+        <ul id="project-list-mobile"></ul>
+        <div class="divider"></div>
+        <button id="btn-save-project-p" class="btn" style="width:100%;margin-bottom:6px;">💾 保存项目</button>
+        <button id="btn-load-project-p" class="btn" style="width:100%;margin-bottom:6px;">📂 加载项目</button>
+        <button id="btn-export-json-p" class="btn" style="width:100%;margin-bottom:6px;">⬇️ 导出JSON</button>
+        <button id="btn-import-json-p" class="btn" style="width:100%;">⬆️ 导入JSON</button>
+      </div>
+    </div>
+    
+    <!-- ===== 底部状态栏 ===== -->
+    <div class="status-bar toolbar-desktop">
+      <div class="status-left">
+        <span>拼豆设计工具 v1.0</span>
+        <span>|</span>
+        <span>提示: 拖拽上传图片 | Ctrl+Z 撤销 | Ctrl+Y 重做 | S 选区 | Z 缩放 | P 平移 | Space+拖拽 平移 | Ctrl+滚轮 缩放</span>
+      </div>
+      <div class="status-right">
+        <span id="status-message">就绪</span>
+      </div>
+    </div>
+
+    <!-- ===== 移动端底部 Tab 栏 ===== -->
+    <div class="mobile-tabbar mobile-only">
+      <button class="mobile-tab active" data-panel="palette">🎨 色板</button>
+      <button class="mobile-tab" data-panel="info">📊 信息</button>
+      <button class="mobile-tab" data-panel="projects">🗂 项目</button>
+    </div>
+
+    <!-- ===== 移动端抽屉遮罩 ===== -->
+    <div class="mobile-overlay" id="mobile-overlay"></div>
+  </div>
+
+  <!-- ===== 图片上传对话框（参数设置） ===== -->
+  <div id="image-upload-dialog" class="modal-dialog" style="display:none;">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+      <h3>图片转拼豆 - 参数设置</h3>
+
+      <div class="upload-area">
+        <input type="file" id="image-upload-input" accept="image/*" style="display:none;">
+        <button class="btn" onclick="document.getElementById('image-upload-input').click()">选择图片</button>
+        <div id="image-preview" style="margin-top: 15px; max-width: 400px;"></div>
+      </div>
+
+      <div class="settings-panel" style="margin-top: 20px;">
+        <div class="setting-item">
+          <label>网格尺寸:</label>
+          <select id="upload-grid-size">
+            <option value="29x29" selected>29×29</option>
+            <option value="50x50">50×50</option>
+            <option value="14x14">14×14</option>
+          </select>
+        </div>
+
+        <div class="setting-item">
+          <label>亮度: <span id="brightness-value">0</span></label>
+          <input type="range" id="brightness-slider" min="-100" max="100" value="0">
+        </div>
+
+        <div class="setting-item">
+          <label>对比度: <span id="contrast-value">0</span></label>
+          <input type="range" id="contrast-slider" min="-100" max="100" value="0">
+        </div>
+
+        <div class="setting-item">
+          <label>饱和度: <span id="saturation-value">0</span></label>
+          <input type="range" id="saturation-slider" min="-100" max="100" value="0">
+        </div>
+
+        <div class="setting-item">
+          <label>
+            <input type="checkbox" id="remove-background"> 去除背景
+          </label>
+        </div>
+
+        <div class="setting-item">
+          <label>
+            <input type="checkbox" id="auto-crop"> 智能裁剪主体
+          </label>
+        </div>
+      </div>
+
+      <div class="modal-actions" style="margin-top: 20px;">
+        <button id="btn-upload-cancel" class="btn">取消</button>
+        <button id="btn-upload-confirm" class="btn btn-primary">转换</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 作品库对话框 ===== -->
+  <div id="gallery-dialog" class="modal-dialog" style="display:none;">
+    <div class="modal-overlay"></div>
+    <div class="modal-content" style="max-width: 800px;">
+      <h3>我的作品库</h3>
+
+      <div class="gallery-toolbar" style="margin: 15px 0; display: flex; gap: 10px;">
+        <input type="text" id="gallery-search" placeholder="搜索作品..." style="flex: 1; padding: 8px;">
+        <button id="btn-gallery-export" class="btn">导出</button>
+        <button id="btn-gallery-import" class="btn">导入</button>
+      </div>
+
+      <div id="gallery-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; max-height: 400px; overflow-y: auto;">
+        <!-- 作品卡片由 JS 动态生成 -->
+      </div>
+
+      <div class="modal-actions" style="margin-top: 20px;">
+        <button id="btn-gallery-close" class="btn">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 图案库对话框 ===== -->
+  <div id="pattern-dialog" class="modal-dialog" style="display:none;">
+    <div class="modal-overlay"></div>
+    <div class="modal-content" style="max-width: 500px;">
+      <h3>选择图案</h3>
+
+      <div id="pattern-list" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px;">
+        <!-- 图案按钮由 JS 动态生成 -->
+      </div>
+
+      <div class="modal-actions" style="margin-top: 20px;">
+        <button id="btn-pattern-cancel" class="btn">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 脚本模块 -->
+  <script src="bead-colors.js"></script>
+  <script src="image-processor.js"></script>
+  <script src="exporter.js"></script>
+  <script src="gallery.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
